@@ -1,3 +1,16 @@
+# IntelliJ project files
+/.idea
+*.iml
+# eclipse project files
+/.settings
+.classpath
+.project
+# temp output
+/.tmp
+*.log
+/node_modules
+/bower_components
+npm-debug.log
 .DS_Store
-bower_components
-scripts
+/dist
+**/.DS_Store
