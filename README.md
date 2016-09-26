@@ -11,3 +11,5 @@ Need bower installed.
 BLOG ARTICLE HERE: <a href="http://www.delimited.io/blog/2014/11/18/interactive-chord-diagrams-in-d3">LINK</a>
 
 DEMO HERE: <a href="http://projects.delimited.io/experiments/chord-transitions/demos/trade.html">LINK</a>
+
+ORIGIN Homepage: <a href="https://github.com/sghall/chord-transitions">LINK</a>
