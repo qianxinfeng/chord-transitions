@@ -157,7 +157,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
                 let config = $scope.config;
                 if (config.tooltip.formatter) {
                     let info = config.tooltip.formatter(matrix.read(d));
-                    $tooltip.html(info);
+                    $tooltip.css({left:d3.event.clientX,top:d3.event.clientY-100}).html(info);
                 }
             }
 
