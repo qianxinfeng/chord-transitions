@@ -4,14 +4,10 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         "#74d9ed", "#f8a13f", "#dae342", "#8d7be3", "#a4e59b", "#54becc"
     ];
     var link = function ($scope, $el, $attr) {
-        $scope.id = "d3-" + $scope.$id;
-
-        let size = [750, 750]; // SVG SIZE WIDTH, HEIGHT
-        let marg = [50, 50, 50, 50]; // TOP, RIGHT, BOTTOM, LEFT
-        let dims = []; // USABLE DIMENSIONS
-        dims[0] = size[0] - marg[1] - marg[3]; // WIDTH
-        dims[1] = size[1] - marg[0] - marg[2]; // HEIGHT
-
+		$scope.id = "d3-" + $scope.$id;
+		let $container = $el, $tooltip = $container.find(".tooltip");
+		let marg = [50, 50, 50, 50]; // TOP, RIGHT, BOTTOM, LEFT
+		let size = getSize();
         let colors = d3.scale.ordinal()
             .range(colorPalette);
 
@@ -41,7 +37,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
                 return {value: value, data: items};
             });
 
-        let innerRadius = (dims[1] / 2) - 100;
+        let innerRadius = (size.dims[1] / 2) - 100;
 
         let arc = d3.svg.arc()
             .innerRadius(innerRadius)
@@ -50,16 +46,16 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         let path = d3.svg.chord()
             .radius(innerRadius);
 
-        let $container = $el, $tooltip = $container.find(".tooltip");
+
         let svg = d3.select($container[0]).append("svg")
             .attr("class", "chart")
-            .attr({width: size[0] + "px", height: size[1] + "px"})
+            .attr({width: size.width + "px", height: size.height + "px"})
             .attr("preserveAspectRatio", "xMinYMin")
-            .attr("viewBox", "0 0 " + size[0] + " " + size[1]);
+            .attr("viewBox", "0 0 " + size.width + " " + size.height);
 
         let gContainer = svg.append("g")
-            .attr("class", "container")
-            .attr("transform", "translate(" + ((dims[0] / 2) + marg[3]) + "," + ((dims[1] / 2) + marg[0]) + ")");
+            .attr("class", "g-container")
+            .attr("transform", "translate(" + ((size.dims[0] / 2) + marg[3]) + "," + ((size.dims[1] / 2) + marg[0]) + ")");
         let messages = svg.append("text")
             .attr("class", "messages")
             .attr("transform", "translate(10, 10)")
@@ -93,6 +89,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
 
             gEnter.append("text")
                 .style("pointer-events", "none")
+                .style("font-size", "9px")
                 .attr("dy", ".35em")
                 .text(function (d) {
                     return d._id;
@@ -193,16 +190,32 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         }
 
         $scope.$watch("config.data", function (current, prev) {
-            if (!angular.equals(current, prev)) {
-                draw(current);
-            }
+			draw(current);
         });
-
+		function getSize() {
+			let dims = []; // USABLE DIMENSIONS
+			let dimension = $scope.dimension;
+			let width, height,ratio=[1,1];
+			if(dimension){
+				ratio = dimension.split(":").reverse().map(Number);
+			}
+			let clientWidth = $container[0].clientWidth;
+			if(clientWidth<10){
+				width=1200;
+				height=800;
+			}else{
+				width = clientWidth;
+				height = width * ratio[0] / ratio[1];
+			}
+			dims[0] = width - marg[1] - marg[3]; // WIDTH
+			dims[1] = height - marg[0] - marg[2]; // HEIGHT
+			return {width,height,dims};
+		}
         function resize() {
-            var width = $el.parent()[0].clientWidth;
+            size = getSize();
             svg.attr({
-                width: width,
-                height: width / (size[0] / size[1])
+                width: size.width,
+                height: size.height
             });
         }
 
@@ -217,7 +230,8 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         template: "<div id='{{id}}' class='d3-container'><div class='tooltip'></div>",
         replace: true,
         scope: {
-            config: "="
+            config: "=",
+			dimension:"="
         },
         link: link
     };
