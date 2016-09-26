@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="css/app.css">
 
   </head>
-  <body ng-app="app" ng-cloak ng-controller="mainCntrl">
+  <body ng-app="app" ng-cloak ng-controller="mainController">
     <div class="container">
       <div class="row">
         <div class="col-sm-12 text-center">
@@ -31,7 +31,7 @@
 
         <div class="col-sm-7" role="content">
           <article>
-            <chord-diagram></chord-diagram>
+            <div d3-chord config="chordChartConfig"></div>
             <h6 class="text-center">International Trade Flows <span>{{ selected_year }}</span></h6>
           </article>
         </div>
@@ -80,10 +80,9 @@
     </div>
 
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
     <script src="../bower_components/d3/d3.min.js"></script>
-    <script src="mainController.js"></script>
-    <script src="../src/matrixFactory.js"></script>
     <script src="../src/chordDirective.js"></script>
+    <script src="mainController.js"></script>
   </body>
 </html>

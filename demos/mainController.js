@@ -1,26 +1,37 @@
-angular.module('app', []);
+angular.module('app', ['d3-chord']);
 
-angular.module('app').controller('mainCntrl', ['$scope',
-    function ($scope) {
-
-        $scope.master = {}; // MASTER DATA STORED BY YEAR
-
-        $scope.selected_year = 2005;
+angular.module('app').controller('mainController', ['$scope','$http',function ($scope,$http) {
+        //所有数据
+        $scope.dataMap={};
+        //和弦图配置
+        $scope.chordChartConfig={
+            data:{},
+            tooltip:{
+                formatter:function (param) {
+                    return `
+                         从${ param.sname } 到 ${ param.tname } : ${ qFormat(param.svalue)},
+                         占 ${ param.sname } (${ qFormat(param.stotal) })的${ pFormat(param.svalue/param.stotal) } ,
+                         占 全部（${ qFormat(param.mtotal) }） 的 ${ pFormat(param.svalue/param.mtotal) }
+                         从${ param.tname } 到 ${ param.sname } :  ${ qFormat(param.tvalue) },
+                         占 ${ param.tname } (${ qFormat(param.ttotal) })的${ pFormat(param.tvalue/param.ttotal) },
+                         占 全部（${ qFormat(param.mtotal) }） 的 ${ pFormat(param.tvalue/param.mtotal) }
+                    `;
+                }
+            },
+            callback:{
+                groupClick:function (d) {
+                    $scope.addFilter(d._id);
+                }
+            }
+        };
         $scope.years = d3.range(2005, 1865, -5);
-
-        $scope.filters = {};
+        $scope.selected_year = 2005;
         $scope.hasFilters = false;
-
-        $scope.tooltip = {};
+        $scope.filters = {};
 
         // FORMATS USED IN TOOLTIP TEMPLATE IN HTML
-        $scope.pFormat = d3.format(".1%");  // PERCENT FORMAT
-        $scope.qFormat = d3.format(",.0f"); // COMMAS FOR LARGE NUMBERS
-
-        $scope.updateTooltip = function (data) {
-            $scope.tooltip = data;
-            $scope.$apply();
-        };
+        let pFormat = d3.format(".1%");  // PERCENT FORMAT
+        let qFormat = d3.format(",.0f"); // COMMAS FOR LARGE NUMBERS
 
         $scope.addFilter = function (name) {
             $scope.hasFilters = true;
@@ -28,47 +39,47 @@ angular.module('app').controller('mainCntrl', ['$scope',
                 name: name,
                 hide: true
             };
-            $scope.$apply();
         };
-
-        $scope.update = function () {
-            var data = $scope.master[$scope.selected_year];
-
-            if (data && $scope.hasFilters) {
-                $scope.drawChords(data.filter(function (d) {
+        //过滤数据
+        $scope.doFilter = function () {
+            var yearData = $scope.dataMap[$scope.selected_year];
+            if (yearData && $scope.hasFilters) {
+                $scope.chordChartConfig.data=yearData.filter(function (d) {
                     var fl = $scope.filters;
-                    var v1 = d.importer1, v2 = d.importer2;
+                    var v1 = d.node1, v2 = d.node2;
 
                     if ((fl[v1] && fl[v1].hide) || (fl[v2] && fl[v2].hide)) {
                         return false;
                     }
                     return true;
-                }));
-            } else if (data) {
-                $scope.drawChords(data);
+                });
+            } else if (yearData) {
+                $scope.chordChartConfig.data=yearData;
             }
+
         };
 
         // IMPORT THE CSV DATA
-        $.ajax({
+        $http({
             url:"data/trade.json",
-            cache:false,
-            success:function (data) {
-                data.forEach(function (d) {
-                    //转成数字
-                    d.year = +d.year;
-                    d.weight1 = +d.weight1;
-                    d.weight2 = +d.weight2;
+            cache:false
+        }).then(function (response) {
+            let data={};
+            response.data.forEach(function (d) {
+                //转成数字
+                d.year = +d.year;
+                d.weight1 = +d.weight1;
+                d.weight2 = +d.weight2;
 
-                    if (!$scope.master[d.year]) {
-                        $scope.master[d.year] = []; // STORED BY YEAR
-                    }
-                    $scope.master[d.year].push(d);
-                });
-                $scope.update();
-            }
+                if (!data[d.year]) {
+                    data[d.year] = []; // STORED BY YEAR
+                }
+                data[d.year].push(d);
+            });
+            $scope.dataMap=data;
+            $scope.doFilter();
         });
-        $scope.$watch('selected_year', $scope.update);
-        $scope.$watch('filters', $scope.update, true);
+        $scope.$watch('selected_year', $scope.doFilter);
+        $scope.$watch('filters', $scope.doFilter, true);
 
     }]);
