@@ -9,10 +9,10 @@ angular.module('app').controller('mainController', ['$scope','$http',function ($
             tooltip:{
                 formatter:function (param) {
                     return `
-                         从${ param.sname } 到 ${ param.tname } : ${ qFormat(param.svalue)},
+                         从${ param.sname } 到 ${ param.tname } : ${ qFormat(param.svalue)}<br>
                          占 ${ param.sname } (${ qFormat(param.stotal) })的${ pFormat(param.svalue/param.stotal) } ,
-                         占 全部（${ qFormat(param.mtotal) }） 的 ${ pFormat(param.svalue/param.mtotal) }
-                         从${ param.tname } 到 ${ param.sname } :  ${ qFormat(param.tvalue) },
+                         占 全部（${ qFormat(param.mtotal) }） 的 ${ pFormat(param.svalue/param.mtotal) }<br>
+                         从${ param.tname } 到 ${ param.sname } :  ${ qFormat(param.tvalue) }<br>
                          占 ${ param.tname } (${ qFormat(param.ttotal) })的${ pFormat(param.tvalue/param.ttotal) },
                          占 全部（${ qFormat(param.mtotal) }） 的 ${ pFormat(param.tvalue/param.mtotal) }
                     `;

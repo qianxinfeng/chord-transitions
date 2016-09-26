@@ -1,5 +1,8 @@
 angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory', function ($window, matrixFactory) {
-
+    let colorPalette=[
+        "#52c3f1", "#f77b6b", "#e3d64a", "#6767da", "#68d4b2", "#369d97",
+        "#74d9ed", "#f8a13f", "#dae342", "#8d7be3", "#a4e59b", "#54becc"
+    ];
     var link = function ($scope, $el, $attr) {
         const id = "d3-" + $scope.$id;
         let config = $scope.config;
@@ -12,7 +15,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         dims[1] = size[1] - marg[0] - marg[2]; // HEIGHT
 
         let colors = d3.scale.ordinal()
-            .range(['#9C6744', '#C9BEB9', '#CFA07E', '#C4BAA1', '#C2B6BF', '#121212', '#8FB5AA', '#85889E', '#9C7989', '#91919C', '#242B27', '#212429', '#99677B', '#36352B', '#33332F', '#2B2B2E', '#2E1F13', '#2B242A', '#918A59', '#6E676C', '#6E4752', '#6B4A2F', '#998476', '#8A968D', '#968D8A', '#968D96', '#CC855C', '#967860', '#929488', '#949278', '#A0A3BD', '#BD93A1', '#65666B', '#6B5745', '#6B6664', '#695C52', '#56695E', '#69545C', '#565A69', '#696043', '#63635C', '#636150', '#333131', '#332820', '#302D30', '#302D1F', '#2D302F', '#CFB6A3', '#362F2A']);
+            .range(colorPalette);
 
         let chord = d3.layout.chord()
             .padding(0.02)
@@ -82,17 +85,17 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
                 .attr("class", "group");
 
             gEnter.append("path")
-                .style("pointer-events", "none")
+                .on("click", groupClick)
+                .on("mouseover", dimChords)
+                .on("mouseout", resetChords)
                 .style("fill", function (d) {
                     return colors(d._id);
                 })
                 .attr("d", arc);
 
             gEnter.append("text")
+                .style("pointer-events", "none")
                 .attr("dy", ".35em")
-                .on("click", groupClick)
-                .on("mouseover", dimChords)
-                .on("mouseout", resetChords)
                 .text(function (d) {
                     return d._id;
                 });
