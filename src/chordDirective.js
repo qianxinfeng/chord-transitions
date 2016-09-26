@@ -4,9 +4,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         "#74d9ed", "#f8a13f", "#dae342", "#8d7be3", "#a4e59b", "#54becc"
     ];
     var link = function ($scope, $el, $attr) {
-        const id = "d3-" + $scope.$id;
-        let config = $scope.config;
-        $scope.id = id;
+        $scope.id = "d3-" + $scope.$id;
 
         let size = [750, 750]; // SVG SIZE WIDTH, HEIGHT
         let marg = [50, 50, 50, 50]; // TOP, RIGHT, BOTTOM, LEFT
@@ -145,6 +143,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
             function groupClick(d) {
                 d3.event.preventDefault();
                 d3.event.stopPropagation();
+                let config = $scope.config;
                 if (config.callback && config.callback.groupClick) {
                     config.callback.groupClick(d);
                     if(!$scope.$$phase && !$scope.$root.$$phase) $scope.$apply();
@@ -158,6 +157,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
                 d3.event.stopPropagation();
                 dimChords(d);
                 $tooltip.css("opacity", 1);
+                let config = $scope.config;
                 if (config.tooltip.formatter) {
                     let info = config.tooltip.formatter(matrix.read(d));
                     $tooltip.html(info);
@@ -442,6 +442,3 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         chordMatrix: chordMatrix
     };
 }]);
-
-
-

@@ -53,21 +53,6 @@
             </ul>
           </div>
         </aside>
-
-        <fieldset id="tooltip" class="row secondary">
-          <div class="col-sm-12">
-            <h6>从{{ tooltip.sname }} 到 {{ tooltip.tname }} : {{ qFormat(tooltip.svalue) }}</h6>
-            占 {{ tooltip.sname }} ({{ qFormat(tooltip.stotal) }})的{{ pFormat(tooltip.svalue/tooltip.stotal) }} ,
-            占 全部（{{ qFormat(tooltip.mtotal) }}） 的 {{ pFormat(tooltip.svalue/tooltip.mtotal) }}
-          </div>
-          <div class="col-sm-12">
-            <h6>从{{ tooltip.tname }} 到 {{ tooltip.sname }} :  {{ qFormat(tooltip.tvalue) }}</h6>
-            占 {{ tooltip.tname }} ({{ qFormat(tooltip.ttotal) }})的{{ pFormat(tooltip.tvalue/tooltip.ttotal) }},
-            占 全部（{{ qFormat(tooltip.mtotal) }}） 的 {{ pFormat(tooltip.tvalue/tooltip.mtotal) }}
-          </div>
-
-        </fieldset>
-
       </div>
 
       <footer class="row">

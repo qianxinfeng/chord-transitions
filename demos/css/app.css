@@ -1,3 +1,10 @@
+body{
+  font-family: 'Microsoft YaHei', 'Open Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #555555;
+  background-color: #f0f0f0;
+}
 #tooltip {
   background-color: white;
   pointer-events: none;
