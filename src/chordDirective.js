@@ -59,7 +59,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         let messages = svg.append("text")
             .attr("class", "messages")
             .attr("transform", "translate(10, 10)")
-            .text("Updating...");
+            .text("loading...");
 
         //绘制图形
         function draw(data) {
