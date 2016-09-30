@@ -38,7 +38,7 @@ angular.module('d3-chord', []).directive('d3Chord', ['$window', 'matrixFactory',
         var svg = d3.select($container[0]).append("svg").attr("class", "chart").attr({ width: size.width + "px", height: size.height + "px" }).attr("preserveAspectRatio", "xMinYMin").attr("viewBox", "0 0 " + size.width + " " + size.height);
 
         var gContainer = svg.append("g").attr("class", "g-container").attr("transform", "translate(" + (size.dims[0] / 2 + marg[3]) + "," + (size.dims[1] / 2 + marg[0]) + ")");
-        var messages = svg.append("text").attr("class", "messages").attr("transform", "translate(10, 10)").text("Updating...");
+        var messages = svg.append("text").attr("class", "messages").attr("transform", "translate(10, 10)").text("loading...");
 
         //绘制图形
         function draw(data) {
