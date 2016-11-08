@@ -460,7 +460,10 @@
 
         return {
             restrict: 'EA',
-            template: "<div id='{{id}}' class='d3-container'><div class='tooltip'></div>",
+            template: `<div id='{{id}}' class='d3-container'>
+                        <div class='tooltip'></div>
+                        <div ng-show="!config.data||config.data.length==0" class='empty-mask' style='position:absolute;;top: 50%;width: 100%;left: 0;text-align: center;'>未查询到数据</div>
+                       </div>`,
             replace: true,
             scope: {
                 config: "=",
