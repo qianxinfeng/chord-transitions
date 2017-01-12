@@ -396,19 +396,18 @@
             function getSize() {
                 var dims = []; // USABLE DIMENSIONS
                 var dimension = $scope.dimension;
-                var width = void 0,
+                var width = $container[0].clientWidth,
                     height = void 0,
                     ratio = [1, 1];
                 if (dimension) {
                     ratio = dimension.split(":").reverse().map(Number);
-                }
-                var clientWidth = $container[0].clientWidth;
-                if (clientWidth < 10) {
-                    width = 1200;
-                    height = 800;
-                } else {
-                    width = clientWidth;
                     height = width * ratio[0] / ratio[1];
+                } else {
+                    height = $container[0].clientHeight;
+                }
+                if (width < 50) {
+                    width = 500;
+                    height = 500;
                 }
                 dims[0] = width - marg[1] - marg[3]; // WIDTH
                 dims[1] = height - marg[0] - marg[2]; // HEIGHT
