@@ -5,12 +5,25 @@ body{
   color: #555555;
   background-color: #f0f0f0;
 }
+
+input[type="radio"] {
+  margin: 0px;
+}
+.years {
+  height: 600px;
+  overflow: scroll;
+}
+aside {
+  margin: 0px;
+}
+/* d3 chord chart */
 .d3-container .tooltip {
-  opacity: 0;
+  opacity: 1;
+  display: none;
   transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1), top 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   background-color: rgba(50, 50, 50, 0.498039);
   border-style: solid;
-  border-width: 0px;
+  border-width: 0;
   border-color: rgb(51, 51, 51);
   border-radius: 4px;
   color: rgb(255, 255, 255);
@@ -19,26 +32,23 @@ body{
   top: 0;
   white-space: nowrap;
 }
-
-path.chord {
+.d3-container .loading,.d3-container .empty-mask{
+  display: none;
+  position:absolute;
+  top: 50%;
+  width: 100%;
+  left: 0;
+  text-align: center;
+}
+.d3-container .loading{
+  margin-top: -15px;
+}
+.d3-container.d3-chord path.chord{
   -webkit-backface-visibility: hidden;
   fill-opacity: .67;
   stroke: none;
 }
-
-text, .group path {
+.d3-container.d3-chord .group path {
   cursor: pointer;
 }
-
-input[type="radio"] {
-  margin: 0px;
-}
-
-.years {
-  height: 600px;
-  overflow: scroll;
-}
-
-aside {
-  margin: 0px;
-}
+/* end d3 chord chart */

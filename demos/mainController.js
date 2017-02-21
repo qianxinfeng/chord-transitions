@@ -5,7 +5,7 @@ angular.module('app').controller('mainController', ['$scope','$http',function ($
         $scope.dataMap={};
         //和弦图配置
         $scope.chordChartConfig={
-            data:[],
+            data:null,
             tooltip:{
                 formatter:function (param) {
                     return `

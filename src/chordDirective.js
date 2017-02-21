@@ -236,179 +236,135 @@
             "#52c3f1", "#f77b6b", "#e3d64a", "#6767da", "#68d4b2", "#369d97",
             "#74d9ed", "#f8a13f", "#dae342", "#8d7be3", "#a4e59b", "#54becc"
         ];
-        var link = function ($scope, $el, $attr) {
-            $scope.id = "d3-" + $scope.$id;
-            let $container = $el, $tooltip = $container.find(".tooltip");
-            let marg = [50, 50, 50, 50]; // TOP, RIGHT, BOTTOM, LEFT
-            let size = getSize();
-            let colors = d3.scale.ordinal()
-                .range(colorPalette);
+        return {
+            restrict: 'EA',
+            template: `<div id='d3-{{$id}}' class='d3-container d3-chord'>
+                        <div class='tooltip'></div>
+                        <div class='empty-mask'>未查询到数据</div>
+                        <div class='loading' >loading...</div>
+                       </div>`,
+            replace: true,
+            scope: {
+                config: "=",
+                dimension: "="
+            },
+            bindToController: true,
+            controllerAs: "chart",
+            controller: ['$scope','$element',function ($scope, $el) {
+                let vm = this;
+                let $container = $el,
+                    $tooltip = $container.find(".tooltip"),
+                    $loading = $container.find(".loading"),
+                    $emptyMask = $container.find(".empty-mask");
+                let marg = [50, 50, 50, 50]; // TOP, RIGHT, BOTTOM, LEFT
+                let size = getSize();
+                let colors = d3.scale.ordinal()
+                    .range(colorPalette);
 
-            let chord = d3.layout.chord()
-                .padding(0.02)
-                .sortGroups(d3.descending)
-                .sortSubgroups(d3.ascending);
-            let matrix = matrixFactory.chordMatrix()
-                .layout(chord)
-                .filter(function (item, r, c) {
-                    return (item.node1 === r.name && item.node2 === c.name) ||
-                        (item.node1 === c.name && item.node2 === r.name);
-                })
-                .reduce(function (items, r, c) {
-                    var value;
-                    if (!items[0]) {
-                        value = 0;
-                    } else {
-                        value = items.reduce(function (m, n) {
-                            if (r === c) {
-                                return m + (n.weight1 + n.weight2);
-                            } else {
-                                return m + (n.node1 === r.name ? n.weight1 : n.weight2);
-                            }
-                        }, 0);
-                    }
-                    return { value: value, data: items };
-                });
-
-            let innerRadius = (size.dims[1] / 2) - 100;
-
-            let arc = d3.svg.arc()
-                .innerRadius(innerRadius)
-                .outerRadius(innerRadius + 20);
-
-            let path = d3.svg.chord()
-                .radius(innerRadius);
-
-
-            let svg = d3.select($container[0]).append("svg")
-                .attr("class", "chart")
-                .attr({ width: size.width + "px", height: size.height + "px" })
-                .attr("preserveAspectRatio", "xMinYMin")
-                .attr("viewBox", "0 0 " + size.width + " " + size.height);
-
-            let gContainer = svg.append("g")
-                .attr("class", "g-container")
-                .attr("transform", "translate(" + ((size.dims[0] / 2) + marg[3]) + "," + ((size.dims[1] / 2) + marg[0]) + ")");
-            let messages = svg.append("text")
-                .attr("class", "messages")
-                .attr("transform", "translate(10, 10)")
-                .text("loading...");
-
-            //绘制图形
-            function draw(data) {
-                messages.attr("opacity", 1);
-                messages.transition().duration(1000).attr("opacity", 0);
-                matrix.data(data)
-                    .resetKeys()
-                    .addKeys(['node1', 'node2'])
-                    .update();
-                let groups = gContainer.selectAll("g.group")
-                    .data(matrix.groups(), function (d) {
-                        return d._id;
-                    });
-
-                let gEnter = groups.enter()
-                    .append("g")
-                    .attr("class", "group");
-
-                gEnter.append("path")
-                    .on("click", groupClick)
-                    .on("mouseover", dimChords)
-                    .on("mouseout", resetChords)
-                    .style("fill", function (d) {
-                        return colors(d._id);
+                let chord = d3.layout.chord()
+                    .padding(0.02)
+                    .sortGroups(d3.descending)
+                    .sortSubgroups(d3.ascending);
+                let matrix = matrixFactory.chordMatrix()
+                    .layout(chord)
+                    .filter(function (item, r, c) {
+                        return (item.node1 === r.name && item.node2 === c.name) ||
+                            (item.node1 === c.name && item.node2 === r.name);
                     })
-                    .attr("d", arc);
-
-                gEnter.append("text")
-                    .style("pointer-events", "none")
-                    .style("font-size", "9px")
-                    .attr("dy", ".35em")
-                    .text(function (d) {
-                        return d._id;
+                    .reduce(function (items, r, c) {
+                        let value;
+                        if (!items[0]) {
+                            value = 0;
+                        } else {
+                            value = items.reduce(function (m, n) {
+                                if (r === c) {
+                                    return m + (n.weight1 + n.weight2);
+                                } else {
+                                    return m + (n.node1 === r.name ? n.weight1 : n.weight2);
+                                }
+                            }, 0);
+                        }
+                        return { value: value, data: items };
                     });
 
-                groups.select("path")
-                    .transition().duration(2000)
-                    .attrTween("d", matrix.groupTween(arc));
+                let innerRadius = (size.dims[1] / 2) - 100;
 
-                groups.select("text")
-                    .transition()
-                    .duration(2000)
-                    .attr("transform", function (d) {
-                        d.angle = (d.startAngle + d.endAngle) / 2;
-                        var r = "rotate(" + (d.angle * 180 / Math.PI - 90) + ")";
-                        var t = " translate(" + (innerRadius + 26) + ")";
-                        return r + t + (d.angle > Math.PI ? " rotate(180)" : " rotate(0)");
-                    })
-                    .attr("text-anchor", function (d) {
-                        return d.angle > Math.PI ? "end" : "begin";
-                    });
+                let arc = d3.svg.arc()
+                    .innerRadius(innerRadius)
+                    .outerRadius(innerRadius + 20);
 
-                groups.exit().select("text").attr("fill", "orange");
-                groups.exit().select("path").remove();
+                let path = d3.svg.chord()
+                    .radius(innerRadius);
 
-                groups.exit().transition().duration(1000)
-                    .style("opacity", 0).remove();
 
-                let chords = gContainer.selectAll("path.chord")
-                    .data(matrix.chords(), function (d) {
-                        return d._id;
-                    });
+                let svg = d3.select($container[0]).append("svg")
+                    .attr("class", "chart")
+                    .attr({ width: size.width + "px", height: size.height + "px" })
+                    .attr("preserveAspectRatio", "xMinYMin")
+                    .attr("viewBox", "0 0 " + size.width + " " + size.height);
 
-                chords.enter().append("path")
-                    .attr("class", "chord")
-                    .style("fill", function (d) {
-                        return colors(d.source._id);
-                    })
-                    .attr("d", path)
-                    .on("mouseover", chordMouseover)
-                    .on("mouseout", hideTooltip);
+                let gContainer = svg.append("g")
+                    .attr("class", "g-container")
+                    .attr("transform", "translate(" + ((size.dims[0] / 2) + marg[3]) + "," + ((size.dims[1] / 2) + marg[0]) + ")");
+                showLoading();
 
-                chords.transition().duration(2000)
-                    .attrTween("d", matrix.chordTween(path));
-
-                chords.exit().remove();
-                //点击事件
+                //group点击事件
                 function groupClick(d) {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
-                    let config = $scope.config;
+                    let config = vm.config;
                     if (config.callback && config.callback.groupClick) {
                         config.callback.groupClick(d);
                         if (!$scope.$$phase && !$scope.$root.$$phase) $scope.$apply();
                     }
                     resetChords();
                 }
-
                 //鼠标飘过事件
                 function chordMouseover(d) {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
                     dimChords(d);
-                    $tooltip.css("opacity", 1);
-                    let config = $scope.config;
+                    showToolTip(d);
+                }
+                //显示tooltip
+                function showToolTip(d) {
+                    $tooltip.show();
+                    let config = vm.config;
                     if (config.tooltip.formatter) {
                         let info = config.tooltip.formatter(matrix.read(d));
                         $tooltip.css({ left: d3.event.offsetX + 20, top: d3.event.offsetY + 20 }).html(info);
                     }
                 }
-
                 //隐藏tooltip
                 function hideTooltip() {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
-                    $tooltip.css("opacity", 0);
+                    $tooltip.hide();
                     resetChords();
                 }
-
-                //重置
+                //显示Loading
+                function showLoading() {
+                    $loading.show();
+                }
+                //隐藏Loading
+                function hideLoading() {
+                    $loading.hide();
+                }
+                //处理“空数据”显示
+                function handleEmptyMask(data) {
+                    $emptyMask.hide();
+                    if(data&&data.length==0){
+                        //show empty mask
+                        $emptyMask.show();
+                    }
+                }
+                //重置所有Chord显示状态
                 function resetChords() {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
                     gContainer.selectAll("path.chord").style("opacity", 0.9);
                 }
-
+                //高亮特定的Chord
                 function dimChords(d) {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
@@ -420,55 +376,124 @@
                         }
                     });
                 }
-            }
+                //渲染图形
+                function renderChart(config) {
+                    if(config.data){
+                        hideLoading();
+                        handleEmptyMask(config.data);
+                    }else{
+                        showLoading();
+                    }
+                    let data=config.data||[];
+                    matrix.data(data)
+                        .resetKeys()
+                        .addKeys(['node1', 'node2'])
+                        .update();
+                    let groups = gContainer.selectAll("g.group")
+                        .data(matrix.groups(), function (d) {
+                            return d._id;
+                        });
 
-            $scope.$watch("config.data", function (current, prev) {
-                draw(current);
-            });
-            function getSize() {
-                let dims = []; // USABLE DIMENSIONS
-                let dimension = $scope.dimension;
-                let width = $container[0].clientWidth,height,ratio = [1, 1];
-                if (dimension) {
-                    ratio = dimension.split(":").reverse().map(Number);
-                    height = width * ratio[0] / ratio[1];
-                }else{
-                    height=$container[0].clientHeight;
-                }
-                if (width < 50) {
-                    width = 500;
-                    height = 500;
-                }
-                dims[0] = width - marg[1] - marg[3]; // WIDTH
-                dims[1] = height - marg[0] - marg[2]; // HEIGHT
-                return { width, height, dims };
-            }
-            function resize() {
-                size = getSize();
-                svg.attr({
-                    width: size.width,
-                    height: size.height
-                });
-            }
+                    let gEnter = groups.enter()
+                        .append("g")
+                        .attr("class", "group");
 
-            resize();
-            $window.addEventListener("resize", function () {
+                    gEnter.append("path")
+                        .on("click", groupClick)
+                        .on("mouseover", dimChords)
+                        .on("mouseout", resetChords)
+                        .style("fill", function (d) {
+                            return colors(d._id);
+                        })
+                        .attr("d", arc);
+
+                    gEnter.append("text")
+                        .style("pointer-events", "none")
+                        .style("font-size", "9px")
+                        .attr("dy", ".35em")
+                        .text(function (d) {
+                            return d._id;
+                        });
+
+                    groups.select("path")
+                        .transition().duration(2000)
+                        .attrTween("d", matrix.groupTween(arc));
+
+                    groups.select("text")
+                        .transition()
+                        .duration(2000)
+                        .attr("transform", function (d) {
+                            d.angle = (d.startAngle + d.endAngle) / 2;
+                            let r = "rotate(" + (d.angle * 180 / Math.PI - 90) + ")";
+                            let t = " translate(" + (innerRadius + 26) + ")";
+                            return r + t + (d.angle > Math.PI ? " rotate(180)" : " rotate(0)");
+                        })
+                        .attr("text-anchor", function (d) {
+                            return d.angle > Math.PI ? "end" : "begin";
+                        });
+
+                    groups.exit().select("text").attr("fill", "orange");
+                    groups.exit().select("path").remove();
+
+                    groups.exit().transition().duration(1000)
+                        .style("opacity", 0).remove();
+
+                    let chords = gContainer.selectAll("path.chord")
+                        .data(matrix.chords(), function (d) {
+                            return d._id;
+                        });
+
+                    chords.enter().append("path")
+                        .attr("class", "chord")
+                        .style("fill", function (d) {
+                            return colors(d.source._id);
+                        })
+                        .attr("d", path)
+                        .on("mouseover", chordMouseover)
+                        .on("mouseout", hideTooltip);
+
+                    chords.transition().duration(2000)
+                        .attrTween("d", matrix.chordTween(path));
+
+                    chords.exit().remove();
+
+                }
+                //计算容器大小
+                function getSize() {
+                    let dims = []; // USABLE DIMENSIONS
+                    let dimension = vm.dimension;
+                    let width = $container[0].clientWidth,height,ratio = [1, 1];
+                    if (dimension) {
+                        ratio = dimension.split(":").reverse().map(Number);
+                        height = width * ratio[0] / ratio[1];
+                    }else{
+                        height=$container[0].clientHeight;
+                    }
+                    if (width < 50) {
+                        width = 500;
+                        height = 500;
+                    }
+                    dims[0] = width - marg[1] - marg[3]; // WIDTH
+                    dims[1] = height - marg[0] - marg[2]; // HEIGHT
+                    return { width, height, dims };
+                }
+                //重新调整图形大小
+                function resize() {
+                    size = getSize();
+                    svg.attr({
+                        width: size.width,
+                        height: size.height
+                    });
+                }
                 resize();
-            });
-        };
 
-        return {
-            restrict: 'EA',
-            template: `<div id='{{id}}' class='d3-container'>
-                        <div class='tooltip'></div>
-                        <div ng-show="!config.data||config.data.length==0" class='empty-mask' style='position:absolute;;top: 50%;width: 100%;left: 0;text-align: center;'>未查询到数据</div>
-                       </div>`,
-            replace: true,
-            scope: {
-                config: "=",
-                dimension: "="
-            },
-            link: link
+                $scope.$watch("chart.config", function (current, prev) {
+                    renderChart(vm.config);
+                },true);
+                $window.addEventListener("resize", function () {
+                    resize();
+                });
+            }]
         };
     }
 })(angular);
